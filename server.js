@@ -6,51 +6,13 @@ const nunjucks = require("nunjucks");
 // database configuration
 const Pool = require("pg").Pool;
 const db = new Pool({
-  user: "postman",
+  user: "postgres",
   password: "0000",
   host: "localhost",
   port: 5432,
   database: "doe"
 });
 
-// donors list
-const donors = [
-  {
-    name: "Melissa Soligo",
-    blood: "AB+",
-    image: ""
-  },
-  {
-    name: "Gabriel Rodrigues",
-    blood: "B-",
-    image: ""
-  },
-  {
-    name: "Camila Ribeiro",
-    blood: "A+",
-    image: ""
-  },
-  {
-    name: "Maria Helena",
-    blood: "AB+",
-    image: ""
-  },
-  {
-    name: "João Paulo",
-    blood: "B+",
-    image: ""
-  }
-  // {
-  //     name: "Flávia Costa",
-  //     blood: "O+",
-  //     image: "",
-  // },
-  // {
-  //     name: "Marcos Fontes",
-  //     blood: "O-",
-  //     image: "",
-  // },
-];
 // configure  show files extras
 server.use(express.static("public"));
 
@@ -67,15 +29,14 @@ nunjucks.configure("./", {
 });
 // show configuration of the page, send obj donors
 server.get("/", (req, res) => {
-  return res.render('index.html', { donors });
-  // db.query("SELECT * FROM donors", (err, result) => {
-  //   if (err) return res.send("Erro de banco de dados.");
+  db.query("SELECT * FROM donors ORDER BY ID DESC LIMIT 5", (err, result) => {
+    if (err) return res.send("Erro de banco de dados.");
 
-  //   //   const donors = [] result.rows;
-  //   return res.render("index.html", {
-  //     donors
-  //   });
-  // });
+    const donors = result.rows;
+    return res.render("index.html", {
+      donors
+    });
+  });
 });
 
 server.post("/", (req, res) => {
@@ -84,24 +45,19 @@ server.post("/", (req, res) => {
   const email = req.body.email;
   const blood = req.body.blood;
 
-  // add values in array
-  donors.push({
-    name: name,
-    blood: blood
-  });
-
   // validate data
-  // if (name == "" || email == "" || blood == "") {
-  //   return res.send("Todos os campos são obrigatórios.");
-  // }
+  if (name == "" || email == "" || blood == "") {
+    return res.send("Todos os campos são obrigatórios.");
+  }
   // // value in database
-  // const query = `INSERT INTO donors ("name", "emai", "blood") VALUES($1, $2, $3))`;
-  // db.query(query, [name, email, blood], err => {
-  //   if (err) return res.send("Erro o banco de dados.");
+  const query = `INSERT INTO donors ("name", "email", "blood") 
+                          VALUES ($1,  $2,  $3)`;
+  const values = [name, email, blood]
+  db.query(query, values, err => {
+    if (err) return res.send(err);
 
-  //   return res.redirect("/");
-  // });
-  return res.redirect('/');
+    return res.redirect("/");
+  });
 });
 // On server
 server.listen(PORT, () => {
