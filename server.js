@@ -67,14 +67,15 @@ nunjucks.configure("./", {
 });
 // show configuration of the page, send obj donors
 server.get("/", (req, res) => {
-  db.query("SELECT * FROM donors", (err, result) => {
-    if (err) return res.send("Erro de banco de dados.");
+  return res.render('index.html', { donors });
+  // db.query("SELECT * FROM donors", (err, result) => {
+  //   if (err) return res.send("Erro de banco de dados.");
 
-    //   const donors = [] result.rows;
-    return res.render("index.html", {
-      donors
-    });
-  });
+  //   //   const donors = [] result.rows;
+  //   return res.render("index.html", {
+  //     donors
+  //   });
+  // });
 });
 
 server.post("/", (req, res) => {
@@ -90,16 +91,17 @@ server.post("/", (req, res) => {
   });
 
   // validate data
-  if (name == "" || email == "" || blood == "") {
-    return res.send("Todos os campos são obrigatórios.");
-  }
-  // value in database
-  const query = `INSERT INTO donors ("name", "emai", "blood") VALUES($1, $2, $3))`;
-  db.query(query, [name, email, blood], err => {
-    if (err) return res.send("Erro o banco de dados.");
+  // if (name == "" || email == "" || blood == "") {
+  //   return res.send("Todos os campos são obrigatórios.");
+  // }
+  // // value in database
+  // const query = `INSERT INTO donors ("name", "emai", "blood") VALUES($1, $2, $3))`;
+  // db.query(query, [name, email, blood], err => {
+  //   if (err) return res.send("Erro o banco de dados.");
 
-    return res.redirect("/");
-  });
+  //   return res.redirect("/");
+  // });
+  return res.redirect('/');
 });
 // On server
 server.listen(PORT, () => {
